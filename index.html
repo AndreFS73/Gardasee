@@ -72,14 +72,13 @@
     /* Detail panel — left, hidden by default */
     .detail-side {
       flex: 0 0 0px;
-      overflow: visible;
+      overflow: hidden;
       transition: flex 0.35s ease;
-      background: rgba(255,255,255,0.93);
+      background: rgba(255,255,255,0.91);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       border-right: 0.5px solid var(--border);
       z-index: 1;
-      position: relative;
     }
     .card.expanded .detail-side { flex: 0 0 218px; }
 
@@ -198,18 +197,18 @@
     .leaflet-control-attribution { opacity: 0; transition: opacity 0.7s ease; }
     .intro-done .leaflet-control-attribution { opacity: 1; }
 
-    /* Schließ-Tab rechts am Detailpanel */
+    /* Schließ-Tab links in der map-side (schließt Detailpanel) */
     .panel-close-tab {
-      position: absolute; right: -17px; top: 50%;
+      position: absolute; left: 0; top: 50%;
       transform: translateY(-50%);
       width: 17px; height: 52px;
-      background: rgba(255,255,255,0.93);
+      background: rgba(255,255,255,0.91);
       backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       border: 0.5px solid var(--border-md); border-left: none;
       border-radius: 0 6px 6px 0;
       cursor: pointer; display: none;
       align-items: center; justify-content: center;
-      font-size: 13px; color: var(--text-sec); z-index: 10;
+      font-size: 13px; color: var(--text-sec); z-index: 1001;
       transition: background 0.12s;
     }
     .panel-close-tab:hover { background: var(--surface2); }
@@ -245,7 +244,6 @@
 
       <!-- DETAIL PANEL left -->
       <div class="detail-side">
-        <button class="panel-close-tab" onclick="clearSelection()" title="Detailansicht schließen">‹</button>
         <div class="detail-inner">
           <div class="route-color-bar" id="dp-bar"></div>
           <div class="detail-name" id="dp-name"></div>
@@ -271,6 +269,7 @@
       <!-- MAP right -->
       <div class="map-side">
         <button class="close-btn" onclick="clearSelection()" title="Schließen" aria-label="Detail schließen">✕</button>
+        <button class="panel-close-tab" onclick="clearSelection()" title="Detailansicht schließen">‹</button>
         <button class="panel-open-tab intro-hidden" id="panel-open-tab" title="Detailansicht öffnen">›</button>
         <div id="map"></div>
         <!-- Route legend -->
