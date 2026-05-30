@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqhA=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -130,14 +130,12 @@
     .maps-btn:hover { background: #cddff7; }
 
     /* Map side */
-    .map-side { flex: 1 1 auto; min-width: 0; position: relative; }
+    .map-side { flex: 1 1 auto; min-width: 0; position: relative; min-height: 480px; }
 
     #map {
-      width: 100%; height: 480px;
+      width: 100%; height: 480px; min-height: 480px;
       border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-    }
-    .card.expanded #map {
-      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: var(--surface2);
     }
 
     .close-btn {
