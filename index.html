@@ -205,6 +205,7 @@
             <div class="meta-item"><label>Strecke</label><span id="dp-dist"></span></div>
             <div class="meta-item"><label>Fahrzeit</label><span id="dp-time"></span></div>
             <div class="meta-item" style="grid-column:1/-1"><label>Zwischenstopp</label><span id="dp-stop"></span></div>
+            <div class="meta-item" style="grid-column:1/-1"><label>Länder</label><span id="dp-countries"></span></div>
           </div>
           <span class="tag pro" id="dp-pro"></span>
           <span class="tag con" id="dp-con"></span>
@@ -241,6 +242,7 @@
       {
         id:1, name:"Hauptroute (Brenner)", color:"#185FA5",
         dist:"~970 km", time:"11 Std.", stop:"München", pass:"Brenner 1.370 m",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Schnellste und direkteste Verbindung",
         con:"Stauanfällig, Brenner-Maut, Großbaustellen",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Brenner+Pass/Riva+del+Garda,+Autonomous+Province+of+Trento,+Italy/data=!4m20!4m19!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJkcVm_TJXnUcR2DRkieoxHy8!2m2!1d11.5060678!2d47.0017816!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -260,6 +262,7 @@
       {
         id:2, name:"Alte Brennerstraße", color:"#0F6E56",
         dist:"~970 km", time:"12–13 Std.", stop:"München", pass:"B182 / SS12",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Spart Sondermaut, schöne Landschaft",
         con:"Bei Sperrung sofort voll; strenge Abfahrverbote",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Matrei+am+Brenner,+Austria/Vipiteno,+Italy/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJF9r2rrVcnUcRsIrmLVeXAAQ!2m2!1d11.452126999999999!2d47.1256622!1m5!1m1!19sChIJ7U8rkUBTnUcR-fzWKd6Rz-w!2m2!1d11.432147299999999!2d46.8963393!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -279,6 +282,7 @@
       {
         id:3, name:"Über den Vinschgau", color:"#993C1D",
         dist:"~1.020 km", time:"12 Std.", stop:"Garmisch-P.", pass:"Fernpass + Reschenpass",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Wunderschön am Reschensee, brennerunabhängig",
         con:"Fernpass oft überlastet, teils einspurig",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Reschen+Pass/Riva+del+Garda,+Italy/data=!4m20!4m19!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJ5y2YvkAwg0cR2tIbvgqStaY!2m2!1d10.5!2d46.8333333!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -299,6 +303,7 @@
       {
         id:4, name:"Ausweich Sterzing Nord", color:"#854F0B",
         dist:"~1.010 km", time:"12,5 Std.", stop:"Innsbruck", pass:"Jaufenpass 2.094 m",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Hilft wenn A22 südlich von Sterzing blockiert",
         con:"Extrem kurvenreich, steil, Wintersperre",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Vipiteno,+Italy/Jaufen+Pass/Merano,+Italy/Riva+del+Garda,+Italy/data=!4m32!4m31!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJ7U8rkUBTnUcR-fzWKd6Rz-w!2m2!1d11.432147299999999!2d46.8963393!1m5!1m1!19sChIJ5UcQDnKygkcRbR4ej98k7aI!2m2!1d11.316666699999999!2d46.8333333!1m5!1m1!19sChIJ2xr5zwG8gkcRWaTQdcopgII!2m2!1d11.152578499999999!2d46.6711489!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -318,6 +323,7 @@
       {
         id:5, name:"Ausweich Sterzing Süd", color:"#993356",
         dist:"~980 km", time:"12,5 Std.", stop:"Innsbruck", pass:"Penser Joch 2.211 m",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Abkürzung durchs Sarntal, idyllisch",
         con:"Sehr hohe Passstraße, steile Abschnitte, Wintersperre",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Vipiteno,+Italy/Penser+Joch,+Italy/Bolzano,+Italy/Riva+del+Garda,+Italy/data=!4m32!4m31!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJ7U8rkUBTnUcR-fzWKd6Rz-w!2m2!1d11.432147299999999!2d46.8963393!1m5!1m1!19sChIJXYVkdZOrgkcRl3h9lbUJrFE!2m2!1d11.440927499999999!2d46.8187194!1m5!1m1!19sChIJSXCeQSucgkcRKkOLNE9pK2U!2m2!1d11.3402543!2d46.4949259!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -337,6 +343,7 @@
       {
         id:6, name:"Felbertauern-Route", color:"#3B6D11",
         dist:"~1.040 km", time:"12,5–13 Std.", stop:"Kitzbühel", pass:"Felbertauerntunnel 1.632 m",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Oft stauarm, ganzjährig offen",
         con:"Eigene Tunnelmaut, längere Landstraßenabschnitte",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Mittersill,+Austria/Felbertauerntunnel,+Austria/Lienz,+Austria/Riva+del+Garda,+Italy/data=!4m32!4m31!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJDR_AZQKpd0cR1rahqChwIg0!2m2!1d12.4792615!2d47.2794472!1m5!1m1!19sChIJ28_ppzkKd0cR6P8rdPjeSMU!2m2!1d12.5194645!2d47.1394495!1m5!1m1!19sChIJNav5OvNdd0cROzWF3RReq6s!2m2!1d12.76272!2d46.82769!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -357,6 +364,7 @@
       {
         id:7, name:"Sommer-Alternative Ötztal", color:"#A32D2D",
         dist:"~1.150 km", time:"15 Std.", stop:"Garmisch-P.", pass:"Timmelsjoch 2.509 m",
+        routeCountries:"Deutschland · Österreich · Italien",
         pro:"Spektakulärer Hochalpenpass, einzigartiges Erlebnis",
         con:"Nur Juni–Oktober offen, teure Sondermaut",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Soelden,+Austria/Timmelsjoch/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJxxooVFsynUcRP9_DLq7bKE0!2m2!1d11.0076232!2d46.965493699999996!1m5!1m1!19sChIJKfA9eSjLgkcR5hoEg3yfBnw!2m2!1d11.0999999!2d46.9!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -377,6 +385,7 @@
       {
         id:8, name:"Über die Schweiz", color:"#534AB7",
         dist:"~1.210 km", time:"13,5 Std.", stop:"Nürnberg", pass:"San Bernardino 2.066 m",
+        routeCountries:"Deutschland · Schweiz · Italien",
         pro:"Umfährt Alpenraum, landschaftlich grandios",
         con:"Deutlicher Mehrweg, CH-Vignette, Mailand-Stau",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Lindau,+Germany/Chur,+Switzerland/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJnQ7J3jYMm0cRgC9hIfqqOEU!2m2!1d9.6930544999999988!2d47.5536543!1m5!1m1!19sChIJVVv3inbHhEcRMB8B16Z4Tys!2m2!1d9.5319859!2d46.8507835!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -397,6 +406,7 @@
       {
         id:9, name:"Ost-Route Tschechien", color:"#5F5E5A",
         dist:"~1.340 km", time:"14,5 Std.", stop:"Prag", pass:"Tauern A10 / Plöckenpass",
+        routeCountries:"Deutschland · Tschechien · Österreich · Italien",
         pro:"Ideal für Stopp in Prag",
         con:"Sehr großer Umweg, Tauern ebenfalls stauanfällig",
         maps:"https://www.google.com/maps/dir/Berlin,+Germany/Prague,+Czechia/Villach,+Austria/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJi3lwCZyTC0cRkEAWZg-vAAQ!2m2!1d14.4378005!2d50.075538099999996!1m5!1m1!19sChIJN0EpezeDcEcR5PfvAGaeSa0!2m2!1d13.8506159!2d46.6084959!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
@@ -448,7 +458,7 @@
 
     /* ── Country rectangles ─────────────────────────────────────────────── */
     let countryLayerGroup = L.layerGroup().addTo(map);
-    let overlaysVisible = true;
+    let overlaysVisible = false;
 
     function buildCountryOverlays() {
       countryLayerGroup.clearLayers();
@@ -540,26 +550,6 @@
       .addTo(map);
 
     /* ── Legend ─────────────────────────────────────────────────────────── */
-    // Toggle button
-    const toggleBtn = document.createElement('div');
-    toggleBtn.id = 'overlay-toggle';
-    toggleBtn.innerHTML = `
-      <span id="toggle-dot" style="width:10px;height:10px;border-radius:2px;background:#f2b8b0;border:1.5px solid #c96b5e;flex-shrink:0;display:inline-block"></span>
-      <span class="legend-text">Länder ausblenden</span>
-    `;
-    toggleBtn.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 5px 7px;border-bottom:0.5px solid rgba(0,0,0,0.08);margin-bottom:4px;cursor:pointer;border-radius:4px;transition:background 0.1s;';
-    toggleBtn.addEventListener('mouseenter', () => toggleBtn.style.background = 'var(--surface2)');
-    toggleBtn.addEventListener('mouseleave', () => toggleBtn.style.background = '');
-    toggleBtn.addEventListener('click', () => {
-      overlaysVisible = !overlaysVisible;
-      buildCountryOverlays();
-      const label = toggleBtn.querySelector('.legend-text');
-      const dot = document.getElementById('toggle-dot');
-      label.textContent = overlaysVisible ? 'Länder ausblenden' : 'Länder einblenden';
-      dot.style.opacity = overlaysVisible ? '1' : '0.3';
-    });
-    document.getElementById('legend-items').parentNode.insertBefore(toggleBtn, document.getElementById('legend-items'));
-
     const legendItems = document.getElementById('legend-items');
     routes.forEach(r => {
       const item = document.createElement('div');
@@ -572,6 +562,26 @@
       item.addEventListener('click', () => selectRoute(r.id));
       legendItems.appendChild(item);
     });
+
+    // Toggle button — unterhalb der Routen
+    const toggleBtn = document.createElement('div');
+    toggleBtn.id = 'overlay-toggle';
+    toggleBtn.innerHTML = `
+      <span id="toggle-dot" style="width:10px;height:10px;border-radius:2px;background:#f2b8b0;border:1.5px solid #c96b5e;flex-shrink:0;display:inline-block;opacity:0.3"></span>
+      <span class="legend-text" style="color:var(--text-sec)">Länder einblenden</span>
+    `;
+    toggleBtn.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 5px 3px;margin-top:4px;border-top:0.5px solid rgba(0,0,0,0.08);cursor:pointer;border-radius:4px;transition:background 0.1s;';
+    toggleBtn.addEventListener('mouseenter', () => toggleBtn.style.background = 'var(--surface2)');
+    toggleBtn.addEventListener('mouseleave', () => toggleBtn.style.background = '');
+    toggleBtn.addEventListener('click', () => {
+      overlaysVisible = !overlaysVisible;
+      buildCountryOverlays();
+      const label = toggleBtn.querySelector('.legend-text');
+      const dot = document.getElementById('toggle-dot');
+      label.textContent = overlaysVisible ? 'Länder ausblenden' : 'Länder einblenden';
+      dot.style.opacity = overlaysVisible ? '1' : '0.3';
+    });
+    legendItems.parentNode.appendChild(toggleBtn);
 
     /* ── Interaction ────────────────────────────────────────────────────── */
     function selectRoute(id) {
@@ -599,6 +609,7 @@
       document.getElementById('dp-dist').textContent = r.dist;
       document.getElementById('dp-time').textContent = r.time;
       document.getElementById('dp-stop').textContent = r.stop;
+      document.getElementById('dp-countries').textContent = r.routeCountries;
       document.getElementById('dp-pro').textContent = '✓ ' + r.pro;
       document.getElementById('dp-con').textContent = '✕ ' + r.con;
       document.getElementById('dp-maps').href = r.maps;
