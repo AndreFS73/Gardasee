@@ -446,7 +446,7 @@
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Kartendarstellung: © <a href="http://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
     });
 
-    osmLayer.addTo(map);
+    topoLayer.addTo(map);
 
     L.control.layers(
       { "Straßenkarte": osmLayer, "Geländekarte": topoLayer },
@@ -460,10 +460,14 @@
     let countryLayerGroup = L.layerGroup().addTo(map);
     let overlaysVisible = false;
 
+    let activeRouteCountries = null; // null = alle anzeigen
+
     function buildCountryOverlays() {
       countryLayerGroup.clearLayers();
       if (!overlaysVisible) return;
       countries.forEach(c => {
+        // Wenn eine Route aktiv ist, nur deren Länder zeigen (Teilstring-Match)
+        if (activeRouteCountries && !activeRouteCountries.some(rc => c.name.startsWith(rc) || rc.startsWith(c.name))) return;
         const rect = L.rectangle(c.bounds, {
           fillColor: c.fill,
           fillOpacity: c.opacity,
@@ -611,6 +615,8 @@
       document.getElementById('dp-stop').textContent = r.stop;
       document.getElementById('dp-countries').textContent = r.routeCountries;
       document.getElementById('dp-pro').textContent = '✓ ' + r.pro;
+      activeRouteCountries = r.routeCountries.split(' · ');
+      buildCountryOverlays();
       document.getElementById('dp-con').textContent = '✕ ' + r.con;
       document.getElementById('dp-maps').href = r.maps;
 
@@ -620,6 +626,8 @@
 
     function clearSelection() {
       selected = null;
+      activeRouteCountries = null;
+      buildCountryOverlays();
       card.classList.remove('expanded');
       routes.forEach(r => {
         polylines[r.id].setStyle({ weight: 3, opacity: 0.82 });
