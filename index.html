@@ -413,59 +413,14 @@
       }
     ];
 
-    /* ── Simplified country polygons (lat/lng) ────────────────────────── */
+    /* ── Country rectangles (simple bounding boxes) ─────────────────────── */
+    // [southLat, westLng, northLat, eastLng], pastel red tones, graduated
     const countries = [
-      {
-        name: "Deutschland",
-        fillColor: "#ffffff", fillOpacity: 0.25, color: "#c8c4be", weight: 1,
-        coords: [
-          [55.05,  8.50], [55.05, 15.00], [50.70, 15.05], [50.23, 12.30],
-          [48.69, 13.83], [47.70, 13.00], [47.60, 12.20], [47.55, 10.45],
-          [47.37,  9.53], [47.68,  7.62], [49.46,  6.35], [51.10,  6.12],
-          [53.00,  6.92], [55.05,  8.50]
-        ]
-      },
-      {
-        name: "Österreich",
-        fillColor: "#f0ede8", fillOpacity: 0.35, color: "#c8c4be", weight: 1,
-        coords: [
-          [48.30, 13.83], [48.00, 16.95], [46.65, 17.10], [46.43, 15.65],
-          [46.43, 13.70], [46.85, 12.73], [47.04, 12.15], [46.83, 12.76],
-          [46.62, 13.85], [46.52, 13.20], [47.04, 12.15], [47.00, 11.00],
-          [47.27, 10.18], [47.37,  9.53], [47.55, 10.45], [47.60, 12.20],
-          [47.70, 13.00], [48.30, 13.83]
-        ]
-      },
-      {
-        name: "Schweiz",
-        fillColor: "#f0ede8", fillOpacity: 0.30, color: "#c8c4be", weight: 1,
-        coords: [
-          [47.68,  7.62], [47.57,  8.23], [47.81,  8.56], [47.71,  9.53],
-          [47.37,  9.53], [47.55, 10.45], [47.27, 10.18], [46.93, 10.45],
-          [46.46,  9.18], [46.00,  8.95], [45.83,  6.87], [46.37,  6.08],
-          [46.80,  6.17], [47.48,  7.00], [47.68,  7.62]
-        ]
-      },
-      {
-        name: "Tschechien",
-        fillColor: "#f0ede8", fillOpacity: 0.25, color: "#c8c4be", weight: 1,
-        coords: [
-          [51.05, 12.20], [50.70, 15.05], [50.86, 18.86], [49.57, 18.86],
-          [48.55, 17.14], [48.55, 15.00], [48.69, 13.83], [50.23, 12.30],
-          [51.05, 12.20]
-        ]
-      },
-      {
-        name: "Italien (Nord)",
-        fillColor: "#ffffff", fillOpacity: 0.25, color: "#c8c4be", weight: 1,
-        coords: [
-          [46.52, 13.20], [46.62, 13.85], [46.43, 13.70], [46.43, 15.65],
-          [45.40, 13.80], [43.80, 15.50], [43.50, 13.00], [43.80,  7.55],
-          [44.00,  7.60], [44.40,  8.00], [45.40,  7.00], [45.83,  6.87],
-          [46.00,  8.95], [46.46,  9.18], [46.49, 10.50], [46.62, 12.43],
-          [46.52, 13.20]
-        ]
-      }
+      { name: "Deutschland",   bounds: [[47.30,  6.10], [55.10, 15.05]], fill: "#f7d5d0", opacity: 0.38, border: "#d9897a" },
+      { name: "Österreich",    bounds: [[46.40,  9.50], [48.80, 17.20]], fill: "#f2b8b0", opacity: 0.38, border: "#c96b5e" },
+      { name: "Schweiz",       bounds: [[45.80,  5.95], [47.85, 10.50]], fill: "#f5ccc6", opacity: 0.38, border: "#d9897a" },
+      { name: "Tschechien",    bounds: [[48.55, 12.10], [51.10, 18.90]], fill: "#fce8e5", opacity: 0.35, border: "#d9897a" },
+      { name: "Italien (Nord)",bounds: [[43.50,  6.60], [46.65, 13.90]], fill: "#fdf0ee", opacity: 0.35, border: "#d9897a" },
     ];
 
     /* ── Init Leaflet map ────────────────────────────────────────────────── */
@@ -491,22 +446,31 @@
 
     map.fitBounds([[45.2, 6.5], [52.9, 16.5]]);
 
-    /* ── Country polygons ───────────────────────────────────────────────── */
-    countries.forEach(c => {
-      const layer = L.polygon(c.coords, {
-        fillColor: c.fillColor,
-        fillOpacity: c.fillOpacity,
-        color: c.color,
-        weight: c.weight,
-        interactive: false
-      }).addTo(map);
+    /* ── Country rectangles ─────────────────────────────────────────────── */
+    let countryLayerGroup = L.layerGroup().addTo(map);
+    let overlaysVisible = true;
 
-      layer.bindTooltip(c.name, {
-        permanent: true,
-        direction: 'center',
-        className: 'country-label'
+    function buildCountryOverlays() {
+      countryLayerGroup.clearLayers();
+      if (!overlaysVisible) return;
+      countries.forEach(c => {
+        const rect = L.rectangle(c.bounds, {
+          fillColor: c.fill,
+          fillOpacity: c.opacity,
+          color: c.border,
+          weight: 1.5,
+          dashArray: '4 3',
+          interactive: false
+        });
+        rect.bindTooltip(c.name, {
+          permanent: true,
+          direction: 'center',
+          className: 'country-label'
+        });
+        countryLayerGroup.addLayer(rect);
       });
-    });
+    }
+    buildCountryOverlays();
 
     /* ── Route polylines ────────────────────────────────────────────────── */
     let selected = null;
@@ -576,6 +540,26 @@
       .addTo(map);
 
     /* ── Legend ─────────────────────────────────────────────────────────── */
+    // Toggle button
+    const toggleBtn = document.createElement('div');
+    toggleBtn.id = 'overlay-toggle';
+    toggleBtn.innerHTML = `
+      <span id="toggle-dot" style="width:10px;height:10px;border-radius:2px;background:#f2b8b0;border:1.5px solid #c96b5e;flex-shrink:0;display:inline-block"></span>
+      <span class="legend-text">Länder ausblenden</span>
+    `;
+    toggleBtn.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 5px 7px;border-bottom:0.5px solid rgba(0,0,0,0.08);margin-bottom:4px;cursor:pointer;border-radius:4px;transition:background 0.1s;';
+    toggleBtn.addEventListener('mouseenter', () => toggleBtn.style.background = 'var(--surface2)');
+    toggleBtn.addEventListener('mouseleave', () => toggleBtn.style.background = '');
+    toggleBtn.addEventListener('click', () => {
+      overlaysVisible = !overlaysVisible;
+      buildCountryOverlays();
+      const label = toggleBtn.querySelector('.legend-text');
+      const dot = document.getElementById('toggle-dot');
+      label.textContent = overlaysVisible ? 'Länder ausblenden' : 'Länder einblenden';
+      dot.style.opacity = overlaysVisible ? '1' : '0.3';
+    });
+    document.getElementById('legend-items').parentNode.insertBefore(toggleBtn, document.getElementById('legend-items'));
+
     const legendItems = document.getElementById('legend-items');
     routes.forEach(r => {
       const item = document.createElement('div');
