@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berlin → Gardasee – Routen-Übersicht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqhA=" crossorigin=""></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f5f3ef;
+      --surface:   #ffffff;
+      --surface2:  #f0ede8;
+      --border:    rgba(0,0,0,0.10);
+      --border-md: rgba(0,0,0,0.18);
+      --text:      #1a1917;
+      --text-sec:  #6b6862;
+      --text-ter:  #a09c96;
+      --info-bg:   #e8f0fb;
+      --info-text: #1a52a8;
+      --radius-md: 8px;
+      --radius-lg: 14px;
+      --font-sans: 'DM Sans', sans-serif;
+      --font-serif:'DM Serif Display', serif;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    /* Header */
+    .header { margin-bottom: 1.25rem; }
+    .header h1 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .header p { font-size: 13px; color: var(--text-sec); margin-top: 4px; }
+
+    /* Main card */
+    .card {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      transition: all 0.35s ease;
+    }
+
+    /* Detail panel — left, hidden by default */
+    .detail-side {
+      flex: 0 0 0px;
+      overflow: hidden;
+      transition: flex 0.35s ease;
+      background: var(--surface);
+      border-right: 0.5px solid var(--border);
+      z-index: 1;
+    }
+    .card.expanded .detail-side { flex: 0 0 218px; }
+
+    .detail-inner {
+      padding: 18px 16px;
+      width: 218px;
+      opacity: 0;
+      transition: opacity 0.2s ease 0.18s;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .card.expanded .detail-inner { opacity: 1; }
+
+    .route-color-bar { height: 3px; border-radius: 2px; margin-bottom: 14px; }
+
+    .detail-name {
+      font-size: 14px; font-weight: 500; color: var(--text);
+      line-height: 1.3; margin-bottom: 6px;
+    }
+
+    .pass-badge {
+      display: inline-block; font-size: 10px; padding: 2px 8px;
+      border-radius: 4px; background: var(--info-bg); color: var(--info-text);
+      margin-bottom: 16px; align-self: flex-start;
+    }
+
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .meta-item label {
+      font-size: 10px; color: var(--text-ter); display: block;
+      margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .meta-item span { font-size: 12px; font-weight: 500; color: var(--text); }
+
+    .tag {
+      display: block; font-size: 10.5px; padding: 5px 9px;
+      border-radius: 5px; line-height: 1.5; margin-bottom: 6px;
+    }
+    .tag.pro { background: #eaf3de; color: #2a5010; }
+    .tag.con { background: #fceaea; color: #7a1f1f; }
+
+    .maps-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      font-size: 12px; font-weight: 500; color: var(--info-text);
+      background: var(--info-bg); border: 0.5px solid #9bbde8;
+      border-radius: var(--radius-md); padding: 8px 12px;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.12s; margin-top: auto;
+      font-family: var(--font-sans);
+    }
+    .maps-btn:hover { background: #cddff7; }
+
+    /* Map side */
+    .map-side { flex: 1 1 auto; min-width: 0; position: relative; }
+
+    #map {
+      width: 100%; height: 480px;
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    }
+    .card.expanded #map {
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    }
+
+    .close-btn {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--surface); border: 0.5px solid var(--border-md);
+      border-radius: 50%; width: 28px; height: 28px;
+      font-size: 11px; color: var(--text-sec); cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; transition: background 0.12s; line-height: 1;
+    }
+    .close-btn:hover { background: var(--surface2); }
+    .card.expanded .close-btn { display: flex; }
+
+    /* Leaflet overrides */
+    .leaflet-container { font-family: var(--font-sans); }
+    .country-label {
+      background: none !important; border: none !important; box-shadow: none !important;
+      font-family: var(--font-sans); font-size: 10px; color: #6b6862;
+      white-space: nowrap; pointer-events: none;
+    }
+    .leaflet-tooltip.country-label::before { display: none; }
+
+    /* Route legend overlay */
+    .legend-panel {
+      position: absolute; top: 10px; right: 10px; z-index: 900;
+      background: rgba(255,255,255,0.96); border: 0.5px solid rgba(0,0,0,0.10);
+      border-radius: var(--radius-md); padding: 10px 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08); min-width: 170px;
+    }
+    .legend-title {
+      font-size: 9.5px; font-weight: 500; color: var(--text-sec);
+      letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px;
+      padding-bottom: 5px; border-bottom: 0.5px solid var(--border);
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 5px; border-radius: 4px; cursor: pointer;
+      transition: background 0.1s; margin-bottom: 1px;
+    }
+    .legend-item:hover { background: var(--surface2); }
+    .legend-item.active { background: var(--surface2); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-text { font-size: 10px; color: var(--text); }
+    .legend-sub { font-size: 9px; color: var(--text-sec); }
+
+    /* Footer */
+    .footer { margin-top: 1rem; font-size: 11px; color: var(--text-ter); text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <div class="header">
+      <h1>Berlin → Gardasee</h1>
+      <p>9 Routen im Überblick &nbsp;·&nbsp; Route anklicken für Details &amp; Navigation</p>
+    </div>
+
+    <div class="card" id="main-card">
+
+      <!-- DETAIL PANEL left -->
+      <div class="detail-side">
+        <div class="detail-inner">
+          <div class="route-color-bar" id="dp-bar"></div>
+          <div class="detail-name" id="dp-name"></div>
+          <span class="pass-badge" id="dp-pass"></span>
+          <div class="meta-grid">
+            <div class="meta-item"><label>Strecke</label><span id="dp-dist"></span></div>
+            <div class="meta-item"><label>Fahrzeit</label><span id="dp-time"></span></div>
+            <div class="meta-item" style="grid-column:1/-1"><label>Zwischenstopp</label><span id="dp-stop"></span></div>
+          </div>
+          <span class="tag pro" id="dp-pro"></span>
+          <span class="tag con" id="dp-con"></span>
+          <a class="maps-btn" id="dp-maps" href="#" target="_blank" rel="noopener">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            In Google Maps öffnen
+          </a>
+        </div>
+      </div>
+
+      <!-- MAP right -->
+      <div class="map-side">
+        <button class="close-btn" onclick="clearSelection()" title="Schließen" aria-label="Detail schließen">✕</button>
+        <div id="map"></div>
+        <!-- Route legend -->
+        <div class="legend-panel" id="legend-panel">
+          <div class="legend-title">Routen</div>
+          <div id="legend-items"></div>
+        </div>
+      </div>
+
+    </div><!-- .card -->
+
+    <div class="footer">Kartendaten: © <a href="https://www.openstreetmap.org/copyright" style="color:inherit">OpenStreetMap</a>-Mitwirkende &nbsp;·&nbsp; Quelldaten: Routen-Übersicht Von Berlin zum Gardasee</div>
+
+  </div><!-- .page -->
+
+  <script>
+    /* ── Route data ─────────────────────────────────────────────────────── */
+    const routes = [
+      {
+        id:1, name:"Hauptroute (Brenner)", color:"#185FA5",
+        dist:"~970 km", time:"11 Std.", stop:"München", pass:"Brenner 1.370 m",
+        pro:"Schnellste und direkteste Verbindung",
+        con:"Stauanfällig, Brenner-Maut, Großbaustellen",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Brenner+Pass/Riva+del+Garda,+Autonomous+Province+of+Trento,+Italy/data=!4m20!4m19!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJkcVm_TJXnUcR2DRkieoxHy8!2m2!1d11.5060678!2d47.0017816!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405], // Berlin
+          [51.340, 12.375], // Leipzig
+          [50.110, 11.580], // Bayreuth
+          [48.137, 11.575], // München
+          [47.500, 11.400], // Rosenheim-Süd / Voralpen
+          [47.268, 11.393], // Innsbruck
+          [47.002, 11.507], // Brennerpass
+          [46.720, 11.340], // Brixen
+          [46.498, 11.355], // Bozen
+          [45.890, 10.843]  // Riva del Garda
+        ]
+      },
+      {
+        id:2, name:"Alte Brennerstraße", color:"#0F6E56",
+        dist:"~970 km", time:"12–13 Std.", stop:"München", pass:"B182 / SS12",
+        pro:"Spart Sondermaut, schöne Landschaft",
+        con:"Bei Sperrung sofort voll; strenge Abfahrverbote",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Matrei+am+Brenner,+Austria/Vipiteno,+Italy/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJF9r2rrVcnUcRsIrmLVeXAAQ!2m2!1d11.452126999999999!2d47.1256622!1m5!1m1!19sChIJ7U8rkUBTnUcR-fzWKd6Rz-w!2m2!1d11.432147299999999!2d46.8963393!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.110, 11.580],
+          [48.137, 11.575],
+          [47.500, 11.400],
+          [47.126, 11.452], // Matrei am Brenner
+          [46.896, 11.432], // Sterzing / Vipiteno
+          [46.720, 11.340],
+          [46.498, 11.355],
+          [45.890, 10.843]
+        ]
+      },
+      {
+        id:3, name:"Über den Vinschgau", color:"#993C1D",
+        dist:"~1.020 km", time:"12 Std.", stop:"Garmisch-P.", pass:"Fernpass + Reschenpass",
+        pro:"Wunderschön am Reschensee, brennerunabhängig",
+        con:"Fernpass oft überlastet, teils einspurig",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Reschen+Pass/Riva+del+Garda,+Italy/data=!4m20!4m19!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJ5y2YvkAwg0cR2tIbvgqStaY!2m2!1d10.5!2d46.8333333!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.570, 11.920],
+          [48.137, 11.575],
+          [47.492,  11.095], // Garmisch-Partenkirchen
+          [47.562,  10.750], // Fernpass-Norden
+          [47.310,  10.850], // Fernpass-Süden / Imst
+          [46.862,  10.500], // Reschenpass
+          [46.670,  10.900], // Vinschgau / Schlanders
+          [46.672,  11.157], // Meran
+          [45.890,  10.843]
+        ]
+      },
+      {
+        id:4, name:"Ausweich Sterzing Nord", color:"#854F0B",
+        dist:"~1.010 km", time:"12,5 Std.", stop:"Innsbruck", pass:"Jaufenpass 2.094 m",
+        pro:"Hilft wenn A22 südlich von Sterzing blockiert",
+        con:"Extrem kurvenreich, steil, Wintersperre",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Vipiteno,+Italy/Jaufen+Pass/Merano,+Italy/Riva+del+Garda,+Italy/data=!4m32!4m31!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJ7U8rkUBTnUcR-fzWKd6Rz-w!2m2!1d11.432147299999999!2d46.8963393!1m5!1m1!19sChIJ5UcQDnKygkcRbR4ej98k7aI!2m2!1d11.316666699999999!2d46.8333333!1m5!1m1!19sChIJ2xr5zwG8gkcRWaTQdcopgII!2m2!1d11.152578499999999!2d46.6711489!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.110, 11.580],
+          [48.137, 11.575],
+          [47.268, 11.393],
+          [46.896, 11.432], // Sterzing
+          [46.833, 11.317], // Jaufenpass
+          [46.671, 11.153], // Meran
+          [46.350, 10.910],
+          [45.890, 10.843]
+        ]
+      },
+      {
+        id:5, name:"Ausweich Sterzing Süd", color:"#993356",
+        dist:"~980 km", time:"12,5 Std.", stop:"Innsbruck", pass:"Penser Joch 2.211 m",
+        pro:"Abkürzung durchs Sarntal, idyllisch",
+        con:"Sehr hohe Passstraße, steile Abschnitte, Wintersperre",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Vipiteno,+Italy/Penser+Joch,+Italy/Bolzano,+Italy/Riva+del+Garda,+Italy/data=!4m32!4m31!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJ7U8rkUBTnUcR-fzWKd6Rz-w!2m2!1d11.432147299999999!2d46.8963393!1m5!1m1!19sChIJXYVkdZOrgkcRl3h9lbUJrFE!2m2!1d11.440927499999999!2d46.8187194!1m5!1m1!19sChIJSXCeQSucgkcRKkOLNE9pK2U!2m2!1d11.3402543!2d46.4949259!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.110, 11.580],
+          [48.137, 11.575],
+          [47.268, 11.393],
+          [46.896, 11.432],
+          [46.819, 11.441], // Penser Joch
+          [46.495, 11.340], // Bozen
+          [46.100, 10.980],
+          [45.890, 10.843]
+        ]
+      },
+      {
+        id:6, name:"Felbertauern-Route", color:"#3B6D11",
+        dist:"~1.040 km", time:"12,5–13 Std.", stop:"Kitzbühel", pass:"Felbertauerntunnel 1.632 m",
+        pro:"Oft stauarm, ganzjährig offen",
+        con:"Eigene Tunnelmaut, längere Landstraßenabschnitte",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Mittersill,+Austria/Felbertauerntunnel,+Austria/Lienz,+Austria/Riva+del+Garda,+Italy/data=!4m32!4m31!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJDR_AZQKpd0cR1rahqChwIg0!2m2!1d12.4792615!2d47.2794472!1m5!1m1!19sChIJ28_ppzkKd0cR6P8rdPjeSMU!2m2!1d12.5194645!2d47.1394495!1m5!1m1!19sChIJNav5OvNdd0cROzWF3RReq6s!2m2!1d12.76272!2d46.82769!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.110, 11.580],
+          [48.137, 11.575],
+          [47.780, 12.385], // Rosenheim → Kitzbühel
+          [47.280, 12.479], // Mittersill
+          [47.139, 12.519], // Felbertauerntunnel
+          [46.828, 12.763], // Lienz
+          [46.500, 11.900], // Pustertal Ost
+          [46.498, 11.355],
+          [45.890, 10.843]
+        ]
+      },
+      {
+        id:7, name:"Sommer-Alternative Ötztal", color:"#A32D2D",
+        dist:"~1.150 km", time:"15 Std.", stop:"Garmisch-P.", pass:"Timmelsjoch 2.509 m",
+        pro:"Spektakulärer Hochalpenpass, einzigartiges Erlebnis",
+        con:"Nur Juni–Oktober offen, teure Sondermaut",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Soelden,+Austria/Timmelsjoch/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJxxooVFsynUcRP9_DLq7bKE0!2m2!1d11.0076232!2d46.965493699999996!1m5!1m1!19sChIJKfA9eSjLgkcR5hoEg3yfBnw!2m2!1d11.0999999!2d46.9!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.110, 11.580],
+          [48.137, 11.575],
+          [47.492, 11.095], // Garmisch
+          [47.268, 11.393], // Innsbruck
+          [46.965, 11.008], // Sölden / Ötztal
+          [46.900, 11.100], // Timmelsjoch
+          [46.671, 11.153], // Meran
+          [46.350, 10.910],
+          [45.890, 10.843]
+        ]
+      },
+      {
+        id:8, name:"Über die Schweiz", color:"#534AB7",
+        dist:"~1.210 km", time:"13,5 Std.", stop:"Nürnberg", pass:"San Bernardino 2.066 m",
+        pro:"Umfährt Alpenraum, landschaftlich grandios",
+        con:"Deutlicher Mehrweg, CH-Vignette, Mailand-Stau",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Lindau,+Germany/Chur,+Switzerland/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJnQ7J3jYMm0cRgC9hIfqqOEU!2m2!1d9.6930544999999988!2d47.5536543!1m5!1m1!19sChIJVVv3inbHhEcRMB8B16Z4Tys!2m2!1d9.5319859!2d46.8507835!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [51.340, 12.375],
+          [50.110, 11.580],
+          [49.450, 11.082], // Nürnberg
+          [48.400,  9.980], // Stuttgart / Ulm
+          [47.554,  9.693], // Lindau
+          [47.375,  9.540], // Bregenz
+          [46.851,  9.532], // Chur
+          [46.490,  9.182], // San Bernardino
+          [45.850,  9.050], // Como / Mailand Nord
+          [45.890, 10.843]
+        ]
+      },
+      {
+        id:9, name:"Ost-Route Tschechien", color:"#5F5E5A",
+        dist:"~1.340 km", time:"14,5 Std.", stop:"Prag", pass:"Tauern A10 / Plöckenpass",
+        pro:"Ideal für Stopp in Prag",
+        con:"Sehr großer Umweg, Tauern ebenfalls stauanfällig",
+        maps:"https://www.google.com/maps/dir/Berlin,+Germany/Prague,+Czechia/Villach,+Austria/Riva+del+Garda,+Italy/data=!4m26!4m25!1m5!1m1!19sChIJAVkDPzdOqEcRcDteW0YgIQQ!2m2!1d13.404954!2d52.520006599999995!1m5!1m1!19sChIJi3lwCZyTC0cRkEAWZg-vAAQ!2m2!1d14.4378005!2d50.075538099999996!1m5!1m1!19sChIJN0EpezeDcEcR5PfvAGaeSa0!2m2!1d13.8506159!2d46.6084959!1m5!1m1!19sChIJravdZNAWgkcRo0xnw7LbG2s!2m2!1d10.8431111!2d45.8893165!3e0",
+        coords:[
+          [52.520, 13.405],
+          [50.076, 14.438], // Prag
+          [48.200, 16.370], // Wien
+          [47.300, 15.000], // Graz / Steiermark
+          [46.608, 13.851], // Villach
+          [46.620, 12.800], // Pustertal West
+          [46.498, 11.355], // Bozen
+          [45.890, 10.843]
+        ]
+      }
+    ];
+
+    /* ── Simplified country polygons (lat/lng) ────────────────────────── */
+    const countries = [
+      {
+        name: "Deutschland",
+        fillColor: "#ffffff", fillOpacity: 0.25, color: "#c8c4be", weight: 1,
+        coords: [
+          [55.05,  8.50], [55.05, 15.00], [50.70, 15.05], [50.23, 12.30],
+          [48.69, 13.83], [47.70, 13.00], [47.60, 12.20], [47.55, 10.45],
+          [47.37,  9.53], [47.68,  7.62], [49.46,  6.35], [51.10,  6.12],
+          [53.00,  6.92], [55.05,  8.50]
+        ]
+      },
+      {
+        name: "Österreich",
+        fillColor: "#f0ede8", fillOpacity: 0.35, color: "#c8c4be", weight: 1,
+        coords: [
+          [48.30, 13.83], [48.00, 16.95], [46.65, 17.10], [46.43, 15.65],
+          [46.43, 13.70], [46.85, 12.73], [47.04, 12.15], [46.83, 12.76],
+          [46.62, 13.85], [46.52, 13.20], [47.04, 12.15], [47.00, 11.00],
+          [47.27, 10.18], [47.37,  9.53], [47.55, 10.45], [47.60, 12.20],
+          [47.70, 13.00], [48.30, 13.83]
+        ]
+      },
+      {
+        name: "Schweiz",
+        fillColor: "#f0ede8", fillOpacity: 0.30, color: "#c8c4be", weight: 1,
+        coords: [
+          [47.68,  7.62], [47.57,  8.23], [47.81,  8.56], [47.71,  9.53],
+          [47.37,  9.53], [47.55, 10.45], [47.27, 10.18], [46.93, 10.45],
+          [46.46,  9.18], [46.00,  8.95], [45.83,  6.87], [46.37,  6.08],
+          [46.80,  6.17], [47.48,  7.00], [47.68,  7.62]
+        ]
+      },
+      {
+        name: "Tschechien",
+        fillColor: "#f0ede8", fillOpacity: 0.25, color: "#c8c4be", weight: 1,
+        coords: [
+          [51.05, 12.20], [50.70, 15.05], [50.86, 18.86], [49.57, 18.86],
+          [48.55, 17.14], [48.55, 15.00], [48.69, 13.83], [50.23, 12.30],
+          [51.05, 12.20]
+        ]
+      },
+      {
+        name: "Italien (Nord)",
+        fillColor: "#ffffff", fillOpacity: 0.25, color: "#c8c4be", weight: 1,
+        coords: [
+          [46.52, 13.20], [46.62, 13.85], [46.43, 13.70], [46.43, 15.65],
+          [45.40, 13.80], [43.80, 15.50], [43.50, 13.00], [43.80,  7.55],
+          [44.00,  7.60], [44.40,  8.00], [45.40,  7.00], [45.83,  6.87],
+          [46.00,  8.95], [46.46,  9.18], [46.49, 10.50], [46.62, 12.43],
+          [46.52, 13.20]
+        ]
+      }
+    ];
+
+    /* ── Init Leaflet map ────────────────────────────────────────────────── */
+    const map = L.map('map', { zoomControl: true, attributionControl: true });
+
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
+    });
+
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Kartendarstellung: © <a href="http://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
+    });
+
+    osmLayer.addTo(map);
+
+    L.control.layers(
+      { "Straßenkarte": osmLayer, "Geländekarte": topoLayer },
+      {},
+      { position: 'bottomright', collapsed: false }
+    ).addTo(map);
+
+    map.fitBounds([[45.2, 6.5], [52.9, 16.5]]);
+
+    /* ── Country polygons ───────────────────────────────────────────────── */
+    countries.forEach(c => {
+      const layer = L.polygon(c.coords, {
+        fillColor: c.fillColor,
+        fillOpacity: c.fillOpacity,
+        color: c.color,
+        weight: c.weight,
+        interactive: false
+      }).addTo(map);
+
+      layer.bindTooltip(c.name, {
+        permanent: true,
+        direction: 'center',
+        className: 'country-label'
+      });
+    });
+
+    /* ── Route polylines ────────────────────────────────────────────────── */
+    let selected = null;
+    const card = document.getElementById('main-card');
+    const polylines = {};
+
+    routes.forEach(r => {
+      const pl = L.polyline(r.coords, {
+        color: r.color,
+        weight: 3,
+        opacity: 0.82,
+        lineJoin: 'round',
+        lineCap: 'round'
+      }).addTo(map);
+
+      pl.on('click', () => selectRoute(r.id));
+      pl.on('mouseover', () => {
+        if (selected !== r.id) pl.setStyle({ weight: 4.5, opacity: 1 });
+      });
+      pl.on('mouseout', () => {
+        if (selected !== r.id) pl.setStyle({ weight: 3, opacity: 0.82 });
+      });
+
+      polylines[r.id] = pl;
+    });
+
+    /* ── City markers ───────────────────────────────────────────────────── */
+    const cities = [
+      { name: "Berlin",    lat: 52.520, lng: 13.405, size: 7, bold: true },
+      { name: "München",   lat: 48.137, lng: 11.575, size: 5 },
+      { name: "Innsbruck", lat: 47.268, lng: 11.393, size: 4.5 },
+      { name: "Bozen",     lat: 46.498, lng: 11.355, size: 4 },
+      { name: "Prag",      lat: 50.076, lng: 14.438, size: 4 },
+      { name: "Chur",      lat: 46.851, lng:  9.532, size: 4 },
+      { name: "Lienz",     lat: 46.828, lng: 12.763, size: 3.5 },
+      { name: "Meran",     lat: 46.671, lng: 11.153, size: 3.5 },
+    ];
+
+    cities.forEach(c => {
+      const dot = L.circleMarker([c.lat, c.lng], {
+        radius: c.size,
+        fillColor: c.bold ? '#534AB7' : '#888780',
+        fillOpacity: 1,
+        color: '#fff',
+        weight: 1.5,
+        interactive: false
+      }).addTo(map);
+
+      L.tooltip({
+        permanent: true, direction: 'right',
+        className: 'country-label',
+        offset: [c.size + 3, 0]
+      })
+        .setContent(`<span style="font-weight:${c.bold ? 600 : 400};color:${c.bold ? '#1a1917' : '#6b6862'}">${c.name}</span>`)
+        .setLatLng([c.lat, c.lng])
+        .addTo(map);
+    });
+
+    // Gardasee lake ellipse marker
+    L.circleMarker([45.890, 10.843], {
+      radius: 14, fillColor: '#85B7EB', fillOpacity: 0.65,
+      color: '#4a8bbf', weight: 1, interactive: false
+    }).addTo(map);
+    L.tooltip({ permanent: true, direction: 'right', className: 'country-label', offset: [18, 0] })
+      .setContent('<span style="font-weight:600;color:#1a1917">Gardasee</span>')
+      .setLatLng([45.890, 10.843])
+      .addTo(map);
+
+    /* ── Legend ─────────────────────────────────────────────────────────── */
+    const legendItems = document.getElementById('legend-items');
+    routes.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.id = 'leg-' + r.id;
+      item.innerHTML = `
+        <span class="legend-dot" style="background:${r.color}"></span>
+        <span class="legend-text">${r.id}. ${r.name.replace('Hauptroute (', '').replace(')', '')}</span>
+      `;
+      item.addEventListener('click', () => selectRoute(r.id));
+      legendItems.appendChild(item);
+    });
+
+    /* ── Interaction ────────────────────────────────────────────────────── */
+    function selectRoute(id) {
+      if (selected === id) { clearSelection(); return; }
+      selected = id;
+
+      const r = routes.find(x => x.id === id);
+
+      routes.forEach(ro => {
+        const pl = polylines[ro.id];
+        const leg = document.getElementById('leg-' + ro.id);
+        if (ro.id === id) {
+          pl.setStyle({ weight: 5, opacity: 1 });
+          pl.bringToFront();
+          if (leg) leg.classList.add('active');
+        } else {
+          pl.setStyle({ weight: 2, opacity: 0.15 });
+          if (leg) leg.classList.remove('active');
+        }
+      });
+
+      document.getElementById('dp-bar').style.background = r.color;
+      document.getElementById('dp-name').textContent = r.name;
+      document.getElementById('dp-pass').textContent = r.pass;
+      document.getElementById('dp-dist').textContent = r.dist;
+      document.getElementById('dp-time').textContent = r.time;
+      document.getElementById('dp-stop').textContent = r.stop;
+      document.getElementById('dp-pro').textContent = '✓ ' + r.pro;
+      document.getElementById('dp-con').textContent = '✕ ' + r.con;
+      document.getElementById('dp-maps').href = r.maps;
+
+      card.classList.add('expanded');
+      setTimeout(() => map.invalidateSize(), 360);
+    }
+
+    function clearSelection() {
+      selected = null;
+      card.classList.remove('expanded');
+      routes.forEach(r => {
+        polylines[r.id].setStyle({ weight: 3, opacity: 0.82 });
+        const leg = document.getElementById('leg-' + r.id);
+        if (leg) leg.classList.remove('active');
+      });
+      setTimeout(() => map.invalidateSize(), 360);
+    }
+  </script>
+</body>
+</html>
