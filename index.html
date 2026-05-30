@@ -72,11 +72,14 @@
     /* Detail panel — left, hidden by default */
     .detail-side {
       flex: 0 0 0px;
-      overflow: hidden;
+      overflow: visible;
       transition: flex 0.35s ease;
-      background: var(--surface);
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       border-right: 0.5px solid var(--border);
       z-index: 1;
+      position: relative;
     }
     .card.expanded .detail-side { flex: 0 0 218px; }
 
@@ -161,7 +164,10 @@
     /* Route legend overlay */
     .legend-panel {
       position: absolute; top: 10px; right: 10px; z-index: 900;
-      background: rgba(255,255,255,0.96); border: 0.5px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.91);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 0.5px solid rgba(0,0,0,0.10);
       border-radius: var(--radius-md); padding: 10px 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08); min-width: 170px;
     }
@@ -187,6 +193,44 @@
     /* Intro animation */
     .intro-hidden { opacity: 0; pointer-events: none; }
     .intro-visible { opacity: 1; pointer-events: auto; transition: opacity 0.7s ease; }
+
+    /* Attribution: während Intro unsichtbar */
+    .leaflet-control-attribution { opacity: 0; transition: opacity 0.7s ease; }
+    .intro-done .leaflet-control-attribution { opacity: 1; }
+
+    /* Schließ-Tab rechts am Detailpanel */
+    .panel-close-tab {
+      position: absolute; right: -17px; top: 50%;
+      transform: translateY(-50%);
+      width: 17px; height: 52px;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      border: 0.5px solid var(--border-md); border-left: none;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      font-size: 13px; color: var(--text-sec); z-index: 10;
+      transition: background 0.12s;
+    }
+    .panel-close-tab:hover { background: var(--surface2); }
+    .card.expanded .panel-close-tab { display: flex; }
+
+    /* Öffnen-Tab links an der map-side */
+    .panel-open-tab {
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 17px; height: 52px;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      border: 0.5px solid var(--border-md); border-left: none;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      font-size: 13px; color: var(--text-sec); z-index: 1000;
+      transition: background 0.12s;
+    }
+    .panel-open-tab:hover { background: var(--surface2); }
+    .card.expanded .panel-open-tab { display: none; }
   </style>
 </head>
 <body>
@@ -201,6 +245,7 @@
 
       <!-- DETAIL PANEL left -->
       <div class="detail-side">
+        <button class="panel-close-tab" onclick="clearSelection()" title="Detailansicht schließen">‹</button>
         <div class="detail-inner">
           <div class="route-color-bar" id="dp-bar"></div>
           <div class="detail-name" id="dp-name"></div>
@@ -226,6 +271,7 @@
       <!-- MAP right -->
       <div class="map-side">
         <button class="close-btn" onclick="clearSelection()" title="Schließen" aria-label="Detail schließen">✕</button>
+        <button class="panel-open-tab intro-hidden" id="panel-open-tab" title="Detailansicht öffnen">›</button>
         <div id="map"></div>
         <!-- Route legend -->
         <div class="legend-panel intro-hidden" id="legend-panel">
@@ -442,7 +488,7 @@
       center: [48, 10],
       zoom: 4,
       zoomControl: false,
-      attributionControl: false
+      attributionControl: true  // von Anfang an vorhanden, per CSS zunächst unsichtbar
     });
 
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -487,6 +533,7 @@
     }
     /* ── Route polylines (aufgerufen nach Intro) ────────────────────────── */
     let selected = null;
+    let lastSelected = null;
     const card = document.getElementById('main-card');
     const polylines = {};
 
@@ -590,10 +637,16 @@
     });
     legendItems.parentNode.appendChild(toggleBtn);
 
+    // Open-Tab: letzte Route wiederherstellen oder Route 1 als Standard
+    document.getElementById('panel-open-tab').addEventListener('click', () => {
+      selectRoute(lastSelected !== null ? lastSelected : 1);
+    });
+
     /* ── Interaction ────────────────────────────────────────────────────── */
     function selectRoute(id) {
       if (selected === id) { clearSelection(); return; }
       selected = id;
+      lastSelected = id;
 
       const r = routes.find(x => x.id === id);
 
@@ -642,24 +695,30 @@
 
     /* ── Intro: Zoom-Animation beim Laden ───────────────────────────────── */
     function revealMap() {
-      // Layer-Control und Attribution einschalten
+      // Layer-Control und Zoom-Control einschalten
       L.control.layers(
         { "Straßenkarte": osmLayer, "Geländekarte": topoLayer },
         {},
         { position: 'bottomright', collapsed: false }
       ).addTo(map);
       L.control.zoom({ position: 'topleft' }).addTo(map);
-      L.control.attribution().addTo(map);
+
+      // Attribution per CSS einblenden (war immer vorhanden, nur unsichtbar)
+      map.getContainer().classList.add('intro-done');
 
       // Alle Elemente aufbauen
       buildCountryOverlays();
       buildRoutePolylines();
       buildCityMarkers();
 
-      // Legende einblenden
+      // Legende und Öffnen-Tab einblenden
       const legend = document.getElementById('legend-panel');
       legend.classList.remove('intro-hidden');
       legend.classList.add('intro-visible');
+
+      const openTab = document.getElementById('panel-open-tab');
+      openTab.classList.remove('intro-hidden');
+      openTab.style.display = 'flex';
     }
 
     // Kurze Pause, damit erste Tiles laden, dann hineinfliegen
