@@ -144,16 +144,6 @@
       background: var(--surface2);
     }
 
-    .close-btn {
-      position: absolute; top: 10px; left: 10px;
-      background: var(--surface); border: 0.5px solid var(--border-md);
-      border-radius: 50%; width: 28px; height: 28px;
-      font-size: 11px; color: var(--text-sec); cursor: pointer;
-      display: none; align-items: center; justify-content: center;
-      z-index: 1000; transition: background 0.12s; line-height: 1;
-    }
-    .close-btn:hover { background: var(--surface2); }
-    .card.expanded .close-btn { display: flex; }
 
     /* Leaflet overrides */
     .leaflet-container { font-family: var(--font-sans); }
@@ -205,8 +195,8 @@
     .leaflet-top.leaflet-left { transition: left 0.35s ease; left: 0; }
     .card.expanded .leaflet-top.leaflet-left { left: 228px; }
 
-    /* Schließ-Tab – gleitet synchron mit Panelrand */
-    .panel-close-tab {
+    /* Einziger Panel-Tab – immer sichtbar (nach Intro), gleitet mit */
+    .panel-tab {
       position: absolute; left: 0; top: 50%;
       transform: translateY(-50%);
       width: 17px; height: 52px;
@@ -214,30 +204,13 @@
       backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       border: 0.5px solid var(--border-md); border-left: none;
       border-radius: 0 6px 6px 0;
-      cursor: pointer; display: none;
+      cursor: pointer; display: none;          /* intro-hidden, JS zeigt ihn */
       align-items: center; justify-content: center;
       font-size: 13px; color: var(--text-sec); z-index: 1001;
       transition: left 0.35s ease, background 0.12s;
     }
-    .panel-close-tab:hover { background: var(--surface2); }
-    .card.expanded .panel-close-tab { display: flex; left: 228px; }
-
-    /* Öffnen-Tab links an der map-side */
-    .panel-open-tab {
-      position: absolute; left: 0; top: 50%;
-      transform: translateY(-50%);
-      width: 17px; height: 52px;
-      background: rgba(255,255,255,0.93);
-      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-      border: 0.5px solid var(--border-md); border-left: none;
-      border-radius: 0 6px 6px 0;
-      cursor: pointer; display: none;
-      align-items: center; justify-content: center;
-      font-size: 13px; color: var(--text-sec); z-index: 1000;
-      transition: background 0.12s;
-    }
-    .panel-open-tab:hover { background: var(--surface2); }
-    .card.expanded .panel-open-tab { display: none; }
+    .panel-tab:hover { background: rgba(240,237,232,0.95); }
+    .card.expanded .panel-tab { left: 228px; }
   </style>
 </head>
 <body>
@@ -276,9 +249,7 @@
 
       <!-- MAP right -->
       <div class="map-side">
-        <button class="close-btn" onclick="clearSelection()" title="Schließen" aria-label="Detail schließen">✕</button>
-        <button class="panel-close-tab" onclick="clearSelection()" title="Detailansicht schließen">‹</button>
-        <button class="panel-open-tab intro-hidden" id="panel-open-tab" title="Detailansicht öffnen">›</button>
+        <button class="panel-tab" id="panel-tab" title="Detailansicht öffnen/schließen">›</button>
         <div id="map"></div>
         <!-- Route legend -->
         <div class="legend-panel intro-hidden" id="legend-panel">
@@ -644,9 +615,13 @@
     });
     legendItems.parentNode.appendChild(toggleBtn);
 
-    // Open-Tab: letzte Route wiederherstellen oder Route 1 als Standard
-    document.getElementById('panel-open-tab').addEventListener('click', () => {
-      selectRoute(lastSelected !== null ? lastSelected : 1);
+    // Panel-Tab: öffnet oder schließt je nach Zustand
+    document.getElementById('panel-tab').addEventListener('click', () => {
+      if (card.classList.contains('expanded')) {
+        clearSelection();
+      } else {
+        selectRoute(lastSelected !== null ? lastSelected : 1);
+      }
     });
 
     /* ── Interaction ────────────────────────────────────────────────────── */
@@ -684,7 +659,8 @@
       document.getElementById('dp-maps').href = r.maps;
 
       card.classList.add('expanded');
-      setTimeout(() => map.invalidateSize(), 360);
+      document.getElementById('panel-tab').textContent = '‹';
+      document.getElementById('panel-tab').title = 'Detailansicht schließen';
     }
 
     function clearSelection() {
@@ -692,6 +668,8 @@
       activeRouteCountries = null;
       buildCountryOverlays();
       card.classList.remove('expanded');
+      document.getElementById('panel-tab').textContent = '›';
+      document.getElementById('panel-tab').title = 'Detailansicht öffnen';
       routes.forEach(r => {
         polylines[r.id].setStyle({ weight: 3, opacity: 0.82 });
         const leg = document.getElementById('leg-' + r.id);
@@ -718,14 +696,14 @@
       buildRoutePolylines();
       buildCityMarkers();
 
-      // Legende und Öffnen-Tab einblenden
+      // Legende einblenden
       const legend = document.getElementById('legend-panel');
       legend.classList.remove('intro-hidden');
       legend.classList.add('intro-visible');
 
-      const openTab = document.getElementById('panel-open-tab');
-      openTab.classList.remove('intro-hidden');
-      openTab.style.display = 'flex';
+      // Panel-Tab einblenden
+      const tab = document.getElementById('panel-tab');
+      tab.style.display = 'flex';
     }
 
     // Kurze Pause, damit erste Tiles laden, dann hineinfliegen
