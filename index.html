@@ -183,6 +183,37 @@
     /* Footer */
     .footer { margin-top: 1rem; font-size: 11px; color: var(--text-ter); text-align: right; }
 
+    /* Landscape-Hinweis für Touchgeräte im Hochformat */
+    .rotate-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(26,25,23,0.88);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    }
+    .rotate-box {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px; padding: 32px 28px;
+      text-align: center; max-width: 280px;
+    }
+    .rotate-icon {
+      font-size: 48px; display: block; margin-bottom: 12px;
+      animation: spin-hint 2s ease-in-out infinite;
+    }
+    @keyframes spin-hint {
+      0%,100% { transform: rotate(0deg); }
+      40%      { transform: rotate(90deg); }
+      60%      { transform: rotate(90deg); }
+    }
+    .rotate-box p { font-family: var(--font-sans); color: var(--text); margin: 0; line-height: 1.5; }
+    .rotate-box .rotate-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+    .rotate-box .rotate-sub  { font-size: 12px; color: var(--text-sec); }
+
+    @media (pointer: coarse) and (orientation: portrait) {
+      .rotate-overlay { display: flex; }
+    }
+
     /* Intro animation */
     .intro-hidden { opacity: 0; pointer-events: none; }
     .intro-visible { opacity: 1; pointer-events: auto; transition: opacity 0.7s ease; }
@@ -214,6 +245,15 @@
   </style>
 </head>
 <body>
+  <!-- Landscape-Hinweis (nur Touchgeräte im Hochformat) -->
+  <div class="rotate-overlay" aria-live="polite">
+    <div class="rotate-box">
+      <span class="rotate-icon">📱</span>
+      <p class="rotate-title">Bitte Gerät drehen</p>
+      <p class="rotate-sub">Diese Karte ist für Querformat optimiert</p>
+    </div>
+  </div>
+
   <div class="page">
 
     <div class="header">
