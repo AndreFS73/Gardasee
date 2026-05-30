@@ -183,6 +183,20 @@
     /* Footer */
     .footer { margin-top: 1rem; font-size: 11px; color: var(--text-ter); text-align: right; }
 
+    /* Mobile fixes */
+    @media (pointer: coarse) {
+      /* Detail-Inner scrollbar damit Google Maps Button erreichbar ist */
+      .detail-inner { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      /* Leaflet Attribution klein und nicht überlappend */
+      .leaflet-control-attribution {
+        font-size: 9px !important;
+        max-width: 60vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
     /* Landscape-Hinweis für Touchgeräte im Hochformat */
     .rotate-overlay {
       display: none;
